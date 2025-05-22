@@ -104,6 +104,7 @@ Bind-mount it24_host (folder soal) agar container bisa baca file asli.
 ```
 
 ### output
+![gambar 3a](assets/soal%203%20a.png)
 
 ### Soal 3 B
 “Mendeteksi file dengan kata kunci ‘nafis’/‘kimcun’ dan membalikkan nama file saat ditampilkan.”
