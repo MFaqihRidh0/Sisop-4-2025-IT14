@@ -91,7 +91,7 @@ volumes:
 - Fungsi utama: main() memanggil fuse_main() dengan mount point /antink_mount
 
 - Entry point:
-```
+```C
 int main(int argc, char *argv[]) {
     char *fuse_argv[] = { "antink", "/antink_mount", "-f", NULL };
     return fuse_main(3, fuse_argv, &antink_ops, NULL);
@@ -112,7 +112,7 @@ Bind-mount it24_host (folder soal) agar container bisa baca file asli.
 - Callback: antink_readdir()
 
 Deteksi:
-```
+```C
 if (is_danger(de->d_name)) {
     log_msg("[ALERT] Anomaly detected %s in file: %s", de->d_name, dirp);
     char rev[256];
@@ -123,7 +123,7 @@ if (is_danger(de->d_name)) {
 ```
 - Helper:
   
-```
+```C
 static int is_danger(const char *name) { … }
 static void reverse_name(const char *orig, char *out) {
     strcpy(out, orig);
@@ -141,7 +141,7 @@ static void reverse_name(const char *orig, char *out) {
 
 - Logika ROT13:
 
-```
+```C
 if (strstr(p, ".txt") && !is_danger(p)) {
     // loop tiap karakter
     buf[i] = encrypt_rot13(data[i]);
@@ -162,7 +162,7 @@ if (strstr(p, ".txt") && !is_danger(p)) {
 
 - Format dengan timestamp:
 
-```
+```C
 static void log_msg(const char *fmt, const char *arg1, const char *arg2) {
     time_t now = time(NULL);
     localtime_r(&now, &tm);
