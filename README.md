@@ -177,8 +177,6 @@ for (size_t i = 0; i < bin_len; i++) {
 
 ![image](https://github.com/user-attachments/assets/d16d25c9-4841-42e8-bd2c-921d65ff35c9)
 
-
-
 #### Struktur Akhir
 ![image](https://github.com/user-attachments/assets/5293e848-0c38-4cc5-81f9-de4b938488e7)
 
@@ -190,6 +188,8 @@ direcroty mnt kosong dan tidak ada file berisi folder anomali yang sudah dikonve
 
 #### Cara mengatasi
 WSL sering punya masalah dengan FUSE, termasuk saat melepas mount, karena dukungan filesystem yang terbatas. Karena WSL2 menggunakan kernel Linux yang dimodifikasi, dan dukungan untuk FUSE sering kali bermasalah. Microsoft memang terus meningkatkan WSL, tapi untuk saat ini, FUSE lebih cocok dijalankan di Linux native. Sehingga saya mencoba mengganti nama mnt dengan mountpoint agar tidak bertabrakan dengan filesystem yang sudah ada pada bawaan WSL. Dapat Dilihat bahwa Fuse bisa berjalan dengan lancar, dan sesuai dengan struktur akhir soal
+
+#### Struktur Akhir
 ![image](https://github.com/user-attachments/assets/5293e848-0c38-4cc5-81f9-de4b938488e7)
 
 
