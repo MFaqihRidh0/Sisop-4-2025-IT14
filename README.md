@@ -192,6 +192,289 @@ WSL sering punya masalah dengan FUSE, termasuk saat melepas mount, karena dukung
 #### Struktur Akhir
 ![image](https://github.com/user-attachments/assets/5293e848-0c38-4cc5-81f9-de4b938488e7)
 
+# soal-2
+**Dikerjakan oleh Mutiara Diva Jaladitha (5027241083)**
+
+## Deskripsi Soal
+File utuh robot perawat legendaris yang dikenal dengan nama Baymax telah terfragmentasi menjadi 14 bagian kecil, masing-masing berukuran 1 kilobyte, dan tersimpan dalam direktori bernama relics. Pecahan tersebut diberi nama berurutan seperti Baymax.jpeg.000, Baymax.jpeg.001, hingga Baymax.jpeg.013. Seorang ilmuwan ingin membangkitkan kembali Baymax ke dalam bentuk digital yang utuh. Tugas kita sebagai asisten teknis:
+
+a. Membuat sebuah sistem file virtual menggunakan FUSE (Filesystem in Userspace), membuat sebuah direktori mount bernama bebas yang merepresentasikan tampilan Baymax dalam bentuk file utuh Baymax.jpeg. File sistem tersebut akan mengambil data dari folder relics sebagai sumber aslinya.
+b. Ketika direktori FUSE diakses, pengguna hanya akan melihat Baymax.jpeg. File Baymax.jpeg tersebut dapat dibaca, ditampilkan, dan disalin sebagaimana file gambar biasa, hasilnya merupakan gabungan sempurna dari keempat belas pecahan tersebut.
+c. Jika pengguna membuat file baru di dalam direktori FUSE, maka sistem harus secara otomatis memecah file tersebut ke dalam potongan-potongan berukuran maksimal 1 KB, dan menyimpannya di direktori relics menggunakan format [namafile].000, [namafile].001, dan seterusnya. 
+d. Ketika file tersebut dihapus dari direktori mount, semua pecahannya di relics juga harus ikut dihapus.
+e. Sistem juga harus mencatat seluruh aktivitas pengguna dalam sebuah file log bernama activity.log yang disimpan di direktori yang sama. Aktivitas yang dicatat antara lain:
+- Membaca file (misalnya membuka baymax.png)
+- Membuat file baru (termasuk nama file dan jumlah pecahan)
+- Menghapus file (termasuk semua pecahannya yang terhapus)
+- Menyalin file (misalnya cp baymax.png /tmp/)
+
+## Header
+```
+#define FUSE_USE_VERSION 35
+#include <fuse3/fuse.h>
+```
+- Menentukan versi FUSE yang digunakan (`35` berarti versi FUSE 3.5).
+- `fuse.h` adalah header utama FUSE.
+
+```
+#define RELIC_DIR "/home/mutiaradiva/soal_2/relics"
+#define LOG_FILE "/home/mutiaradiva/soal_2/activity.log"
+#define MAX_CHUNK_SIZE 1024
+```
+- `RELIC_DIR`: direktori tempat menyimpan potongan file (chunk).
+- `LOG_FILE`: file untuk mencatat aktivitas filesystem.
+- `MAX_CHUNK_SIZE`: ukuran maksimal satu chunk adalah 1 KB.
+
+## Struktur Data
+```
+typedef struct {
+    char *name;
+    size_t chunk_count;
+} VirtualFile;
+```
+- Menyimpan nama file virtual dan jumlah chunk yang membentuknya.
+```
+static VirtualFile *virtual_files = NULL;
+static size_t file_count = 0;
+```
+- Menyimpan array `virtual_files` berisi semua file virtual.
+- `file_count` menyimpan jumlah file virtual yang sedang aktif.
+
+## log_activity
+Fungsi: Mencatat aktivitas ke dalam file `activity.log` dengan timestamp.
+```
+void log_activity(const char *message) {
+    FILE *log = fopen(LOG_FILE, "a");
+    if (!log) return;
+
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    char timestamp[100];
+    strftime(timestamp, sizeof(timestamp), "%c", t);
+
+    fprintf(log, "[%s] %s\n", timestamp, message);
+    fclose(log);
+}
+```
+- `fopen(..., "a")`: buka file log dalam mode append.
+- `time(...)`: ambil waktu sekarang.
+- `strftime(...)`: ubah waktu ke format string yang bisa dibaca manusia.
+- `fprintf(...)`: tulis [timestamp] pesan.
+- `fclose(...)`: tutup file log.
+
+### Output
+<img width="403" alt="image" src="https://github.com/user-attachments/assets/c0369986-39d5-44e7-9452-df0f1af62ff8" />
+
+
+## is_valid_chunk
+Fungsi: Memeriksa apakah nama file berformat chunk `.000`, `.001`, dll.
+```
+int is_valid_chunk(const char *name) {
+    const char *ext = strrchr(name, '.');
+    if (!ext || strlen(ext) != 4) return 0;
+    for (int i = 1; i < 4; i++) {
+        if (!isdigit(ext[i])) return 0;
+    }
+    return 1;
+}
+```
+- `strrchr(name, '.')`: ambil ekstensi dari nama file (bagian setelah titik).
+- Cek panjang ekstensi (harus 4: titik + 3 angka).
+- Periksa apakah karakter setelah titik adalah digit.
+
+## scan_relics
+Fungsi: Membaca folder `relics/`, mencari chunk, lalu membuat struktur `VirtualFile`.
+```
+void scan_relics() {
+    DIR *dir = opendir(RELIC_DIR);
+    if (!dir) return;
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_type != DT_REG || !is_valid_chunk(entry->d_name))
+            continue;
+
+        char base_name[256];
+        strncpy(base_name, entry->d_name, strlen(entry->d_name) - 4);
+        base_name[strlen(entry->d_name) - 4] = '\0';
+
+        int found = 0;
+        for (size_t i = 0; i < file_count; i++) {
+            if (strcmp(virtual_files[i].name, base_name) == 0) {
+                virtual_files[i].chunk_count++;
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            virtual_files = realloc(virtual_files, (file_count + 1) * sizeof(VirtualFile));
+            virtual_files[file_count].name = strdup(base_name);
+            virtual_files[file_count].chunk_count = 1;
+            file_count++;
+        }
+    }
+
+    closedir(dir);
+}
+```
+- Buka direktori `relics/`.
+- Untuk setiap file:
+   - Skip jika bukan file regular atau bukan chunk.
+   - Ambil base name (nama tanpa `.000`).
+   - Jika base name sudah ada di `virtual_files`, tambahkan `chunk_count`.
+   - Kalau belum ada, alokasikan `VirtualFile` baru.
+
+### Output
+<img width="205" alt="image" src="https://github.com/user-attachments/assets/4a816c76-fb1d-43c4-82c3-3c43289f15e1" />
+
+
+## baymax_getattr(...)
+Fungsi: Memberikan info atribut file (ukuran, jenis, permission, dll).
+```
+if (strcmp(path, "/") == 0) {
+    stbuf->st_mode = S_IFDIR | 0755;
+    stbuf->st_nlink = 2;
+    return 0;
+}
+```
+- Jika path root (/), kembalikan info direktori.
+```
+const char *name = path + 1;
+for (size_t i = 0; i < file_count; i++) {
+    if (strcmp(virtual_files[i].name, name) == 0) {
+        stbuf->st_mode = S_IFREG | 0444;
+        stbuf->st_nlink = 1;
+        stbuf->st_size = virtual_files[i].chunk_count * MAX_CHUNK_SIZE;
+        return 0;
+    }
+}
+```
+- Jika file ditemukan:
+   - Mode: file biasa (readonly).
+   - Ukuran = jumlah chunk × 1024.
+
+## baymax_readdir
+Fungsi: Mengisi daftar file di root mountpoint.
+```
+filler(buf, ".", NULL, 0, 0);
+filler(buf, "..", NULL, 0, 0);
+```
+- Tambah `.` dan `..` ke direktori.
+```
+for (size_t i = 0; i < file_count; i++) {
+    filler(buf, virtual_files[i].name, NULL, 0, 0);
+}
+```
+- Tambahkan nama semua file virtual.
+
+## baymax_open
+Fungsi: Memastikan file yang ingin dibuka ada di daftar `virtual_files`.
+```
+for (size_t i = 0; i < file_count; i++) {
+    if (strcmp(virtual_files[i].name, name) == 0) {
+        log_activity("READ ...");
+        return 0;
+    }
+}
+```
+- Kalau file ditemukan, log READ, izinkan dibuka.
+- Kalau tidak, return ENOENT.
+
+## Output
+<img width="911" alt="image" src="https://github.com/user-attachments/assets/7e317826-5cbd-427b-a0b6-534620ab4d57" />
+
+## baymax_read
+Fungsi: Membaca isi dari file virtual (gabungan chunk).
+```
+for (size_t i = 0; i < vf->chunk_count; i++) {
+    ...
+    if (total_read + chunk_size <= offset) {
+        total_read += chunk_size;
+        continue;
+    }
+
+    ...
+    memcpy(buf + total_read - offset, chunk_buf, bytes_to_read);
+    ...
+}
+```
+- Iterasi semua chunk.
+- Jika offset masih lebih besar dari total_read, lewati chunk.
+- Baca bagian yang diperlukan dan salin ke buffer `buf`.
+
+## baymax_create
+Fungsi: Menambahkan entri file baru ke `virtual_files`.
+- Tambahkan nama file baru.
+- Belum membuat chunk apa pun.
+- Kembali 0 untuk mengizinkan.
+
+### Input
+```
+echo "halo aku suka sisop" > mount_dir/demo.txt
+```
+### Output
+<img width="203" alt="image" src="https://github.com/user-attachments/assets/8d603b33-cc31-4a1d-bdd0-9d65b78dbb28" />
+
+## baymax_write
+Fungsi: Menulis file dengan membaginya menjadi chunk 1 KB.
+```
+for (size_t i = 0; i < chunks; i++) {
+    ...
+    fwrite(buf + i * MAX_CHUNK_SIZE, 1, write_size, f);
+    ...
+}
+```
+- Buka file `filename.000`, `filename.001`, dst.
+- Tulis 1024 byte per file (chunk).
+- Tambahkan chunk ke `relics/`.
+```
+snprintf(log_msg, ...);
+log_activity(log_msg);
+```
+- Mencatat daftar chunk yang dibuat ke log.
+
+### Output
+<img width="404" alt="image" src="https://github.com/user-attachments/assets/909f0faf-758c-4ef4-b6f7-d99e1da6170f" />
+
+## baymax_unlink
+Fungsi: Menghapus file virtual (menghapus semua chunk).
+```
+for (size_t j = 0; j < vf->chunk_count; j++) {
+    snprintf(chunk_path, sizeof(...), "%s/%s.%03zu", RELIC_DIR, vf->name, j);
+    unlink(chunk_path);
+}
+```
+- Hapus semua file chunk satu per satu.
+
+### Input
+<img width="365" alt="image" src="https://github.com/user-attachments/assets/75ffb89e-d7b8-4ddd-8cb8-d39fc52b202a" />
+
+### Output
+<img width="373" alt="image" src="https://github.com/user-attachments/assets/3a3b1d5f-43fc-4353-aa9d-1683380564d8" />
+<img width="292" alt="image" src="https://github.com/user-attachments/assets/ecd0edc6-4065-46b2-b2cd-86ffff144be9" />
+
+
+## int main
+```
+scan_relics();  // Siapkan struktur file virtual dari isi `relics/`
+return fuse_main(argc, argv, &baymax_oper, NULL);  // Jalankan FUSE
+```
+
+## REVISI
+
+### Problem
+Jika pengguna membuat file baru di dalam direktori FUSE, maka sistem harus secara otomatis memecah file tersebut ke dalam potongan-potongan berukuran maksimal 1 KB, dan menyimpannya di direktori relics menggunakan format [namafile].000, [namafile].001, dan seterusnya. Dalam contoh log subsoal e, tertulis:
+`[2025-05-11 10:25:14] WRITE: hero.txt -> hero.txt.000, hero.txt.001`
+Karena itu saya menggunakan isi teks karena format file contohnya `.txt`, tetapi ternyata lebih valid jika menggunakan gambar.
+
+### Perbaikan
+#### Input
+<img width="844" alt="image" src="https://github.com/user-attachments/assets/ca6b0bff-ebb1-42c5-b610-2856cb518c1d" />
+
+#### Output
+<img width="247" alt="image" src="https://github.com/user-attachments/assets/e5bc7083-7139-46ed-9b7f-d6f17afba5f3" />
+<img width="757" alt="image" src="https://github.com/user-attachments/assets/6e7f3df1-7c55-42e1-9c28-0e0a77df38f0" />
 
 # soal-3
 - Dockerfile
