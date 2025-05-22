@@ -199,9 +199,13 @@ WSL sering punya masalah dengan FUSE, termasuk saat melepas mount, karena dukung
 File utuh robot perawat legendaris yang dikenal dengan nama Baymax telah terfragmentasi menjadi 14 bagian kecil, masing-masing berukuran 1 kilobyte, dan tersimpan dalam direktori bernama relics. Pecahan tersebut diberi nama berurutan seperti Baymax.jpeg.000, Baymax.jpeg.001, hingga Baymax.jpeg.013. Seorang ilmuwan ingin membangkitkan kembali Baymax ke dalam bentuk digital yang utuh. Tugas kita sebagai asisten teknis:
 
 a. Membuat sebuah sistem file virtual menggunakan FUSE (Filesystem in Userspace), membuat sebuah direktori mount bernama bebas yang merepresentasikan tampilan Baymax dalam bentuk file utuh Baymax.jpeg. File sistem tersebut akan mengambil data dari folder relics sebagai sumber aslinya.
+
 b. Ketika direktori FUSE diakses, pengguna hanya akan melihat Baymax.jpeg. File Baymax.jpeg tersebut dapat dibaca, ditampilkan, dan disalin sebagaimana file gambar biasa, hasilnya merupakan gabungan sempurna dari keempat belas pecahan tersebut.
+
 c. Jika pengguna membuat file baru di dalam direktori FUSE, maka sistem harus secara otomatis memecah file tersebut ke dalam potongan-potongan berukuran maksimal 1 KB, dan menyimpannya di direktori relics menggunakan format [namafile].000, [namafile].001, dan seterusnya. 
+
 d. Ketika file tersebut dihapus dari direktori mount, semua pecahannya di relics juga harus ikut dihapus.
+
 e. Sistem juga harus mencatat seluruh aktivitas pengguna dalam sebuah file log bernama activity.log yang disimpan di direktori yang sama. Aktivitas yang dicatat antara lain:
 - Membaca file (misalnya membuka baymax.png)
 - Membuat file baru (termasuk nama file dan jumlah pecahan)
