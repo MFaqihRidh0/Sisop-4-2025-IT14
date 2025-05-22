@@ -14,6 +14,7 @@
 
 # soal-3
 - Dockerfile
+
 Menyusun image yang berisi:
 
 - Base image GCC (untuk kompilasi C)
@@ -130,6 +131,8 @@ static void reverse_name(const char *orig, char *out) {
 ```
 ### output
 
+![gambar 3b](assets/soal%203%20b%20revisi%202.png)
+
 ### Soal 3 C
 “Enkripsi isi file teks normal dengan ROT13; file berbahaya tidak dienkripsi.”
 
@@ -148,6 +151,8 @@ if (strstr(p, ".txt") && !is_danger(p)) {
 }
 ```
 ### output
+
+![gambar 3c](assets/soal%203%20c.png)
 
 ### Soal 3 D
 “Semua aktivitas dicatat ke dalam /var/log/it24.log, dimonitor real-time oleh logger.”
@@ -170,6 +175,7 @@ static void log_msg(const char *fmt, const char *arg1, const char *arg2) {
 - Logger Service: tail -F /var/log/it24.log di container antink-logger.
 
 ### output
+![gambar 3d](assets/soal%203%20d%20revisi.png)
 
 ### Soal 3 E
 “Perubahan file hanya terjadi di dalam container; direktori host tidak terpengaruh.”
@@ -187,3 +193,4 @@ ls /antink_mount      # file dimanipulasi
 head it24_host/normal.txt  # teks asli
 ```
 ### output
+![gambar 3e](assets/soal%203%20e.png)
