@@ -674,13 +674,13 @@ Sebagai administrator sistem in-game untuk game maimai di SEGA, Anda bertugas me
 
 Detail Area
 
-A. Starter Chiho: File disimpan dengan tambahan ekstensi .mai di direktori asli (chiho/starter), tetapi tanpa ekstensi di fuse_dir/starter.
-B. Metropolis Chiho: File disimpan dengan ekstensi .ccc di direktori asli, dengan nama file dienkripsi menggunakan pergeseran karakter berdasarkan posisi (misal, E tetap, n menjadi o (+1), e menjadi g (+2), dst.).
-C. Dragon Chiho: File disimpan dengan ekstensi .rot di direktori asli, dengan isi dienkripsi menggunakan ROT13.
-D. Black Rose Chiho: File disimpan dengan ekstensi .bin di direktori asli, dalam format biner murni tanpa enkripsi atau encoding tambahan.
-E. Heaven Chiho: File disimpan dengan ekstensi .enc di direktori asli, dienkripsi menggunakan AES-256-CBC dengan IV yang disimpan di awal file.
-F. Skystreet Chiho: File disimpan dengan ekstensi .gz di direktori asli, dikompresi menggunakan gzip.
-G. 7sRef Chiho: Area spesial yang memetakan file dari semua area lain dengan format penamaan [area]_[nama_file] (misal, starter_guide.txt di fuse_dir/7sref memetakan ke fuse_dir/starter/guide.txt).
+- A. Starter Chiho: File disimpan dengan tambahan ekstensi .mai di direktori asli (chiho/starter), tetapi tanpa ekstensi di fuse_dir/starter.
+- B. Metropolis Chiho: File disimpan dengan ekstensi .ccc di direktori asli, dengan nama file dienkripsi menggunakan pergeseran karakter berdasarkan posisi (misal, E tetap, n menjadi o (+1), e menjadi g (+2), dst.).
+- C. Dragon Chiho: File disimpan dengan ekstensi .rot di direktori asli, dengan isi dienkripsi menggunakan ROT13.
+- D. Black Rose Chiho: File disimpan dengan ekstensi .bin di direktori asli, dalam format biner murni tanpa enkripsi atau encoding tambahan.
+- E. Heaven Chiho: File disimpan dengan ekstensi .enc di direktori asli, dienkripsi menggunakan AES-256-CBC dengan IV yang disimpan di awal file.
+- F. Skystreet Chiho: File disimpan dengan ekstensi .gz di direktori asli, dikompresi menggunakan gzip.
+- G. 7sRef Chiho: Area spesial yang memetakan file dari semua area lain dengan format penamaan [area]_[nama_file] (misal, starter_guide.txt di fuse_dir/7sref memetakan ke fuse_dir/starter/guide.txt).
  
 #### A. Starter Chiho
 
