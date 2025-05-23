@@ -665,6 +665,11 @@ head it24_host/normal.txt  # teks asli
 ![gambar 3e](assets/soal%203%20e.png)
 
 
+### catatan revisi
+1. Sebelum revisi 2b belum membalikkan nama file sesuai kriteria soal . sebelumnya nucmik.jpg dan sifan.jpg. Setelah revisi gpj.nucmik dan gpj.sifan.
+2. menambah file baru seperti kimcun.txt dan test apakah juga sesuai dengan soal apa tidak. Setelah revisi hasilnya sesuai dengan kriteria soal
+
+
 # soal-4
 **Dikerjakan oleh Muhammad Fatihul Qolbi Ash Shiddiqi (5027241023)**
 
